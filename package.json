@@ -1,0 +1,17 @@
+{
+  "name": "sfdc-utils",
+  "main": "./lib/sfdc-utils",
+  "version": "0.0.0",
+  "description": "Random Salesforce utilities",
+  "activationEvents": ["sfdc-utils:toggle", "sfdc-utils:closeLogView", "sfdc-utils:getObjectPermissions"],
+  "repository": "https://github.com/atom/sfdc-utils",
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "dependencies": {
+    "jsforce": "1.2.0",
+    "loophole": "^1.0.0",
+    "underscore": "^1.6.0"
+  }
+}

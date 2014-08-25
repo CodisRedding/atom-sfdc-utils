@@ -1,0 +1,16 @@
+# See https://atom.io/docs/latest/creating-a-package#menus for more details
+'context-menu':
+  '.overlayer':
+      'Enable sfdc-utils': 'sfdc-utils:toggle'
+
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'sfdc-utils'
+      'submenu': [
+        { 'label': 'Toggle', 'command': 'sfdc-utils:toggle' }
+      ]
+    ]
+  }
+]
