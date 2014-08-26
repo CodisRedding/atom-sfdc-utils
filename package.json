@@ -1,5 +1,5 @@
 {
-  "name": "sfdc-utils",
+  "name": "atom-sfdc-utils",
   "main": "./lib/sfdc-utils",
   "version": "0.0.0",
   "description": "Random Salesforce utilities",
