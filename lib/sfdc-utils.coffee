@@ -39,6 +39,9 @@ module.exports =
     atom.workspaceView.command 'sfdc-utils:getFieldInfo', =>
       console.debug 'sfdc-utils:getFieldInfo triggered'
       @getFieldInfo()
+    atom.workspaceView.command 'sfdc-utils:executeSoql', =>
+      console.debug 'sfdc-utils:executeSoql triggered'
+      @executeSoql()
 
     self = @
 
@@ -172,6 +175,67 @@ module.exports =
 
         self.clearStatusBar()
         return
+
+  executeSoql: ->
+    editor = atom.workspace.activePaneItem
+    selection = editor.getSelection()
+    conn = new jsforce.Connection()
+
+    @sfdcUtilsProgressBarView.setStatus 'Retrieving...'
+    self = @
+    allowUnsafeNewFunction ->
+      conn.login config.username, config.password + config.securityToken, (err, res) ->
+        return console.error(err) if err
+
+        records = []
+        query = conn.query(selection.getText().trim())
+        query.on("record", (record) ->
+          records.push record
+          return
+        ).on("error", (err) ->
+          callback err
+          return
+        ).on("end", ->
+          callback null,
+            query: query
+            records: records
+
+          return
+        ).run
+          autoFetch: true
+          maxFetch: 5000
+
+        callback = ((err, result) ->
+          self.sfdcUtilsLogView.show()
+          self.sfdcUtilsLogView.clear()
+          self.sfdcUtilsLogView.print err.toString(), true if err
+          return console.error err if err
+          self.sfdcUtilsLogView.removeLastEmptyLogLine()
+          printHeaders = true;
+          table = ''
+          headers = ''
+          row = ''
+          result.records.forEach((val, idx) ->
+              if printHeaders
+                printHeaders = false
+                Object.keys(val).forEach((key) ->
+                    if key isnt 'attributes'
+                      headers += "<td>&nbsp;<strong>#{key}<strong>&nbsp;</td>"
+                  )
+                table += "<tr>#{headers}</tr>"
+
+              row = ''
+              Object.keys(val).forEach((key) ->
+                  if key isnt 'attributes'
+                    row += "<td>&nbsp;#{self.colorify2(val[key])}&nbsp;</td>"
+                )
+              table += "<tr>#{row}</tr>"
+            )
+          self.sfdcUtilsLogView.print "<table>#{table}</table>", false
+          self.sfdcUtilsProgressBarView.setStatus 'Finished'
+          self.clearStatusBar()
+          return
+        )
 
   getPermsForSObject: ->
     editor = atom.workspace.activePaneItem

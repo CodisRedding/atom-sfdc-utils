@@ -7,7 +7,8 @@
     "sfdc-utils:toggle",
     "sfdc-utils:closeLogView",
     "sfdc-utils:getObjectPermissions",
-    "sfdc-utils:getFieldInfo"
+    "sfdc-utils:getFieldInfo",
+    "sfdc-utils:executeSoql"
   ],
   "repository": "https://github.com/fourq/atom-sfdc-utils",
   "license": "MIT",

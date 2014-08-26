@@ -12,3 +12,4 @@
   'ctrl-alt-k': 'sfdc-utils:closeLogView'
   'ctrl-alt-p': 'sfdc-utils:getObjectPermissions'
   'ctrl-alt-f': 'sfdc-utils:getFieldInfo'
+  'ctrl-alt-s': 'sfdc-utils:executeSoql'

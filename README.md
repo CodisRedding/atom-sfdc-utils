@@ -9,5 +9,9 @@ View object and field permissions
 Describe object fields
 ![ctrl-alt-f](https://dl.dropboxusercontent.com/u/89363347/relationships.gif)
 
+#ctrl-alt-s
+Run your SOQL from the editor
+![ctrl-alt-f](https://dl.dropboxusercontent.com/u/89363347/soql.gif)
+
 #ctrl-alt-k
 This will close the output view when you're finished with it.

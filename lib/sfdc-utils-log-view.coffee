@@ -46,7 +46,7 @@ class SfdcUtilsLogView extends View
     at_bottom = (panel.scrollTop() + panel.innerHeight() + 10 > panel[0].scrollHeight)
 
     # Header
-    line = @removeTerminalColors line
+    #line = @removeTerminalColors line
 
     # Remove last newline from previous <pre>
     @removeLastEmptyLogLine()
