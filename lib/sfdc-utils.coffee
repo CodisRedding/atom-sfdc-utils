@@ -36,6 +36,9 @@ module.exports =
     atom.workspaceView.command 'sfdc-utils:getObjectPermissions', =>
       console.debug 'sfdc-utils:getPermsForSObject triggered'
       @getPermsForSObject()
+    atom.workspaceView.command 'sfdc-utils:getFieldInfo', =>
+      console.debug 'sfdc-utils:getFieldInfo triggered'
+      @getFieldInfo()
 
     self = @
 
@@ -70,6 +73,53 @@ module.exports =
       return '<font color="green">true</font>'
     else
       return '<font color="red">false</font>'
+
+  getFieldInfo: ->
+    # TODO
+    editor = atom.workspace.activePaneItem
+    selection = editor.getSelection()
+    parts = selection.getText().trim().split('.')
+    sobject = parts[0]
+    field = parts[1]
+    conn = new jsforce.Connection()
+
+    @sfdcUtilsProgressBarView.setStatus 'Retrieving...'
+    self = @
+    allowUnsafeNewFunction ->
+      conn.login config.username, config.password + config.securityToken, (err, res) ->
+        return console.error(err) if err
+
+        so = conn.sobject('#{sobject}')
+        so.describe((err, r) ->
+          console.debug 'err: %s', err
+          #console.debug 'res: %s', JSON.stringify(res)
+          r.fields.forEach (f) ->
+            console.debug 'updateable %s', f.updateable
+        )
+
+        return
+
+        conn.tooling.executeAnonymous body, ((err, res) ->
+          self.sfdcUtilsLogView.show()
+          self.sfdcUtilsLogView.clear()
+          self.sfdcUtilsLogView.removeLastEmptyLogLine()
+
+          console.debug 'compiled: %s', res.compiled
+          console.debug 'success: %s', res.success
+          console.debug 'result: %s', JSON.stringify(res)
+
+          if err
+            self.sfdcUtilsLogView.print err.toString(), true
+            self.sfdcUtilsProgressBarView.setStatus 'Failed'
+            self.clearStatusBar()
+            return
+
+          # print result
+
+          self.sfdcUtilsProgressBarView.setStatus 'Finished'
+          self.clearStatusBar()
+          return
+        )
 
   getPermsForSObject: ->
     editor = atom.workspace.activePaneItem
