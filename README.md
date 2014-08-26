@@ -4,3 +4,6 @@ Add your Salesforce credentials ATOM > Preferences > find the Sfdc utils package
 #ctrl-alt-p
 View object and field permissions
 ![A screenshot of your spankin' package](https://dl.dropboxusercontent.com/u/89363347/perms.gif)
+
+#ctrl-alt-k
+This will close the output view when you're finished with it.

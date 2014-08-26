@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "Random Salesforce utilities",
   "activationEvents": ["sfdc-utils:toggle", "sfdc-utils:closeLogView", "sfdc-utils:getObjectPermissions", "sfdc-utils:getFieldInfo"],
-  "repository": "https://github.com/atom/sfdc-utils",
+  "repository": "https://github.com/fourq/atom-sfdc-utils",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
