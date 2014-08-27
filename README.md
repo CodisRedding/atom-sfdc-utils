@@ -1,4 +1,4 @@
-M#Setup
+#Setup
 Add your Salesforce credentials ATOM > Preferences > find the Sfdc utils package and paste 'em in.
 
 #ctrl-alt-p
