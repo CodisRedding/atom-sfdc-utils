@@ -20,4 +20,3 @@ Saving to server
 
 #ctrl-alt-k
 This will close the output view when you're finished with it.
-MMM
