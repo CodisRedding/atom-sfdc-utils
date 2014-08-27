@@ -10,7 +10,8 @@ Describe object fields
 ![ctrl-alt-f](https://dl.dropboxusercontent.com/u/89363347/relationships.gif)
 
 #ctrl-alt-s
-Run your SOQL from the editor
+Run your SOQL from the editor. If the Id field is included in your SOQL than
+each result record will be a link to the record in Salesforce
 ![ctrl-alt-f](https://dl.dropboxusercontent.com/u/89363347/soql.gif)
 
 #ctrl-alt-k
