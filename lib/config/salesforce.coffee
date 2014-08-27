@@ -5,6 +5,7 @@ module.exports =
   username: atom.config.get("sfdc-utils.username")
   password: atom.config.get("sfdc-utils.password")
   securityToken: atom.config.get("sfdc-utils.securityToken")
+  apiVersion: atom.config.get("sfdc-utils.apiVersion")
   clientId: env.SF_OAUTH2_CLIENT_ID
   clientSecret: env.SF_OAUTH2_CLIENT_SECRET
   redirectUri: env.SF_OAUTH2_REDIRECT_URI or "http://localhost:4000/oauth2/callback"

@@ -13,3 +13,4 @@
   'ctrl-alt-p': 'sfdc-utils:getObjectPermissions'
   'ctrl-alt-f': 'sfdc-utils:getFieldInfo'
   'ctrl-alt-s': 'sfdc-utils:executeSoql'
+  'ctrl-alt-m': "sfdc-utils:saveMetaComponents"

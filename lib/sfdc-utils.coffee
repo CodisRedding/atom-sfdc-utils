@@ -11,10 +11,11 @@ module.exports =
   sfdcUtilsProgressBarView: null
   sfdcUtilsLogView: null
   configDefaults:
-    loginUrl: "https://login.salesforce.com"
+    loginUrl: 'https://login.salesforce.com'
     username: null
     password: null
     securityToken: null
+    apiVersion: 'xx.x'
 
   activate: (state) ->
     $ ?= require('atom').$
@@ -42,6 +43,9 @@ module.exports =
     atom.workspaceView.command 'sfdc-utils:executeSoql', =>
       console.debug 'sfdc-utils:executeSoql triggered'
       @executeSoql()
+    atom.workspaceView.command 'sfdc-utils:saveMetaComponents', =>
+      console.debug 'sfdc-utils:saveMetaComponents triggered'
+      @saveMetaComponents()
 
     self = @
 
@@ -216,7 +220,7 @@ module.exports =
           headers = ''
           row = ''
           linkleft = ''
-          linkright =''
+          linkright = ''
           result.records.forEach((val, idx) ->
               if printHeaders
                 printHeaders = false
@@ -242,6 +246,79 @@ module.exports =
           self.clearStatusBar()
           return
         )
+
+  saveMetaComponents: ->
+    @sfdcUtilsProgressBarView.setStatus 'Saving...'
+    conn = new jsforce.Connection()
+    editor = atom.workspace.getActiveEditor()
+    editor.save()
+    parts = editor.getTitle().split('.')
+    fullName = parts[0]
+    fileParts = ''
+
+    if parts.length > 2
+      fileExt = ".#{parts[parts.length - 2]}.#{parts[parts.length - 1]}"
+    else
+      fileExt = ".#{parts[parts.length - 1]}"
+
+    isMeta = fileParts.contains('-meta.xml')
+    exts = [
+      ".cls"
+      ".page"
+      ".trigger"
+      ".component"
+      ".object"
+      ".cls-meta.xml"
+      ".page-meta.xml"
+      ".trigger-meta.xml"
+      ".component-meta.xml"
+    ]
+    if exts.indexOf(fileExt) is -1
+      #not a force.com file
+      @sfdcUtilsProgressBarView.setStatus 'Finished'
+      @clearStatusBar()
+      return
+
+    @sfdcUtilsProgressBarView.setStatus 'Packaging metadata...'
+
+    fs = null
+    fs ?= require 'fs'
+    metadata = [{
+        apiVersion: config.apiVersion
+        content: Buffer(fs.readFileSync(editor.getPath())).toString('base64')
+        fullName: fullName
+        label: fullName
+    }]
+
+    self = @
+    allowUnsafeNewFunction ->
+      conn.login config.username, config.password + config.securityToken, (err, res) ->
+        return console.error(err) if err
+
+        conn.metadata.upsertAsync('ApexPage', metadata, (err, res) ->
+            return console.error(err) if err
+            console.debug 'res: %s', res.success
+
+            if res.success
+              self.sfdcUtilsProgressBarView.setStatus "#{res.fullName} Saved to server"
+            else
+              self.sfdcUtilsLogView.show()
+              self.sfdcUtilsLogView.clear()
+              self.sfdcUtilsProgressBarView.setStatus "Error saving to server"
+              self.sfdcUtilsLogView.print err, true if err
+              self.sfdcUtilsLogView.print "Error<br />#{JSON.stringify(res.errors, null, 2).replace(/\\/g, '')}" , true
+          )
+
+    @clearStatusBar()
+
+    # file title
+    #editor.coffee
+    #getTite()
+    #@getPath()
+    #getText()
+    #require path
+    #path.dirname(@getPath() + '-meta.xml')
+
 
   getPermsForSObject: ->
     editor = atom.workspace.activePaneItem

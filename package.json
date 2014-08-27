@@ -8,7 +8,8 @@
     "sfdc-utils:closeLogView",
     "sfdc-utils:getObjectPermissions",
     "sfdc-utils:getFieldInfo",
-    "sfdc-utils:executeSoql"
+    "sfdc-utils:executeSoql",
+    "sfdc-utils:saveMetaComponents"
   ],
   "repository": "https://github.com/fourq/atom-sfdc-utils",
   "license": "MIT",
@@ -18,6 +19,7 @@
   "dependencies": {
     "jsforce": "1.2.0",
     "loophole": "^1.0.0",
+    "request": "^2.40.0",
     "underscore": "^1.6.0"
   }
 }

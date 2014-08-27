@@ -2,3 +2,8 @@
 npm-debug.log
 node_modules
 test
+*.cls
+*.page
+*.trigger
+*.object
+test*
