@@ -81,7 +81,6 @@ module.exports =
     return "<font color=\"" + (if bool then 'green' else 'red') + "\">#{val}</font>"
 
   getFieldInfo: ->
-    # TODO
     editor = atom.workspace.activePaneItem
     selection = editor.getSelection()
     parts = selection.getText().trim().split('.')
@@ -211,23 +210,30 @@ module.exports =
           self.sfdcUtilsLogView.print err.toString(), true if err
           return console.error err if err
           self.sfdcUtilsLogView.removeLastEmptyLogLine()
-          printHeaders = true;
+          printHeaders = true
+          getKey = true
           table = ''
           headers = ''
           row = ''
+          linkleft = ''
+          linkright =''
           result.records.forEach((val, idx) ->
               if printHeaders
                 printHeaders = false
+
                 Object.keys(val).forEach((key) ->
                     if key isnt 'attributes'
-                      headers += "<td>&nbsp;<strong>#{key}<strong>&nbsp;</td>"
+                      headers += "<th nowrap>&nbsp;<strong>#{key}<strong>&nbsp;</th>"
                   )
                 table += "<tr>#{headers}</tr>"
 
               row = ''
               Object.keys(val).forEach((key) ->
+                  if val['Id']
+                    linkleft = "<a href=\"#{conn.loginUrl}/#{val['Id']}\">"
+                    linkright ='</a>'
                   if key isnt 'attributes'
-                    row += "<td>&nbsp;#{self.colorify2(val[key])}&nbsp;</td>"
+                    row += "<td nowrap>&nbsp;#{linkleft}#{self.colorify2(val[key])}#{linkright}&nbsp;</td>"
                 )
               table += "<tr>#{row}</tr>"
             )
