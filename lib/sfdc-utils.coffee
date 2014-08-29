@@ -1,5 +1,7 @@
 {allowUnsafeEval, allowUnsafeNewFunction} = require 'loophole'
 _ = require 'underscore'
+utils = require './utils'
+SalesforceDescribe = require './salesforce-describe'
 
 $ = null
 config = null
@@ -75,15 +77,6 @@ module.exports =
   toggle: ->
     @sfdcUtilsLogView.toggle()
 
-  colorify: (boolValue) ->
-    if boolValue
-      return '<font color="green">true</font>'
-    else
-      return '<font color="red">false</font>'
-
-  colorify2: (val, bool = true) ->
-    return "<font color=\"" + (if bool then 'green' else 'red') + "\">#{val}</font>"
-
   getFieldInfo: ->
     editor = atom.workspace.activePaneItem
     selection = editor.getSelection()
@@ -91,93 +84,15 @@ module.exports =
     sobject = parts[0]
     field = parts[1]
     conn = new jsforce.Connection()
-    foundDescribe = false
-
-    @sfdcUtilsProgressBarView.setStatus 'Retrieving...'
     self = @
+
     allowUnsafeNewFunction ->
-      conn.login config.username, config.password + config.securityToken, (err, res) ->
-        return console.error(err) if err
-        obj = conn.sobject(sobject)
-
-        obj.describe().done((res, err) ->
-            self.sfdcUtilsLogView.print err.toString(), true if err
-            return console.error(err) if err
-
-            res.fields.forEach((val, idx, arr) ->
-                if val.name is field
-                  foundDescribe = true
-                  console.debug 'foundDescribe: %s', foundDescribe
-                  self.sfdcUtilsLogView.show()
-                  self.sfdcUtilsLogView.clear()
-                  self.sfdcUtilsLogView.removeLastEmptyLogLine()
-
-                  pvals = ''
-                  val.picklistValues.forEach((pval) ->
-                      if pval.active
-                        pvals += "<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-                                  (if pval.defaultValue then '[default] -> ' else '') +
-                                  "#{self.colorify2(pval.value)}"
-                    )
-
-                  self.sfdcUtilsLogView.print selection.getText().trim() + "
-                    <br />&nbsp;&nbsp;&nbsp;Relationship Name: #{self.colorify2(val.relationshipName, true)}
-                    <br />&nbsp;&nbsp;&nbsp;Auto Number: #{self.colorify(val.autoNumber)}
-                    <br />&nbsp;&nbsp;&nbsp;Byte Length: #{self.colorify2(val.byteLength)}
-                    <br />&nbsp;&nbsp;&nbsp;Calculated: #{self.colorify(val.calculated)}
-                    <br />&nbsp;&nbsp;&nbsp;Calculated Formula: #{self.colorify2(val.calculatedFormula)}
-                    <br />&nbsp;&nbsp;&nbsp;Cascade Delete: #{self.colorify(val.cascadeDelete)}
-                    <br />&nbsp;&nbsp;&nbsp;Case Sensitive: #{self.colorify(val.caseSensitive)}
-                    <br />&nbsp;&nbsp;&nbsp;Controller Name: #{self.colorify2(val.controllerName)}
-                    <br />&nbsp;&nbsp;&nbsp;Createable: #{self.colorify(val.createable)}
-                    <br />&nbsp;&nbsp;&nbsp;Custom: #{self.colorify(val.custom)}
-                    <br />&nbsp;&nbsp;&nbsp;Default Value Formula: #{self.colorify2(val.defaultValueFormula)}
-                    <br />&nbsp;&nbsp;&nbsp;Defaulted on Create: #{self.colorify(val.defaultedOnCreate)}
-                    <br />&nbsp;&nbsp;&nbsp;Dependent Picklist: #{self.colorify(val.dependentPicklist)}
-                    <br />&nbsp;&nbsp;&nbsp;Deprecated and Hidden: #{self.colorify(val.deprecatedAndHidden)}
-                    <br />&nbsp;&nbsp;&nbsp;Digits: #{self.colorify2(val.digits)}
-                    <br />&nbsp;&nbsp;&nbsp;Display Location In Decimal: #{self.colorify(val.displayLocationInDecimal)}
-                    <br />&nbsp;&nbsp;&nbsp;External Id: #{self.colorify(val.externalId)}
-                    <br />&nbsp;&nbsp;&nbsp;Extra Type Info: #{self.colorify2(val.extraTypeInfo)}
-                    <br />&nbsp;&nbsp;&nbsp;Filterable: #{self.colorify(val.filterable)}
-                    <br />&nbsp;&nbsp;&nbsp;Groupable: #{self.colorify(val.groupable)}
-                    <br />&nbsp;&nbsp;&nbsp;HTML Formatted: #{self.colorify(val.htmlFormatted)}
-                    <br />&nbsp;&nbsp;&nbsp;Id Lookup: #{self.colorify(val.idLookup)}
-                    <br />&nbsp;&nbsp;&nbsp;Inline Help Text: #{self.colorify2(val.inlineHelpText)}
-                    <br />&nbsp;&nbsp;&nbsp;Label: #{self.colorify2(val.label)}
-                    <br />&nbsp;&nbsp;&nbsp;Length: #{self.colorify2(val.length)}
-                    <br />&nbsp;&nbsp;&nbsp;Mask: #{self.colorify2(val.mask)}
-                    <br />&nbsp;&nbsp;&nbsp;Mask Type: #{self.colorify2(val.maskType)}
-                    <br />&nbsp;&nbsp;&nbsp;Name Field: #{self.colorify(val.nameField)}
-                    <br />&nbsp;&nbsp;&nbsp;Name Pointing: #{self.colorify(val.namePointing)}
-                    <br />&nbsp;&nbsp;&nbsp;Nillable: #{self.colorify(val.nillable)}
-                    <br />&nbsp;&nbsp;&nbsp;Permissionable: #{self.colorify(val.permissionable)}
-                    <br />&nbsp;&nbsp;&nbsp;Picklist Values: " + pvals + "
-                    <br />&nbsp;&nbsp;&nbsp;Preceision: #{self.colorify2(val.precision)}
-                    <br />&nbsp;&nbsp;&nbsp;Query by Distance: #{self.colorify(val.queryByDistance)}
-                    <br />&nbsp;&nbsp;&nbsp;Reference to: #{self.colorify2(val.referenceTo)}
-                    <br />&nbsp;&nbsp;&nbsp;Relationship Name: #{self.colorify2(val.relationshipName)}
-                    <br />&nbsp;&nbsp;&nbsp;Relationship Order: #{self.colorify2(val.relationshipOrder)}
-                    <br />&nbsp;&nbsp;&nbsp;Restricted Delete: #{self.colorify(val.restrictedDelete)}
-                    <br />&nbsp;&nbsp;&nbsp;Restricted Picklist: #{self.colorify(val.restrictedPicklist)}
-                    <br />&nbsp;&nbsp;&nbsp;Scale: #{self.colorify2(val.scale)}
-                    <br />&nbsp;&nbsp;&nbsp;Soap Type: #{self.colorify2(val.soapType)}
-                    <br />&nbsp;&nbsp;&nbsp;Sortable: #{self.colorify(val.sortable)}
-                    <br />&nbsp;&nbsp;&nbsp;Type: #{self.colorify2(val.type)}
-                    <br />&nbsp;&nbsp;&nbsp;unique: #{self.colorify(val.unique)}
-                    <br />&nbsp;&nbsp;&nbsp;Updateable: #{self.colorify(val.updateable)}
-                    <br />&nbsp;&nbsp;&nbsp;Write Requires Master Record: #{self.colorify(val.writeRequiresMasterRead)}", false
-                  return
-              )
-
-            if foundDescribe
-              self.sfdcUtilsProgressBarView.setStatus 'Finished'
-            else
-              self.sfdcUtilsProgressBarView.setStatus "Couldn't find #{self.selection.getText().trim()}", true
-          )
-
-        self.clearStatusBar()
-        return
+      conn.login config.username,
+        config.password + config.securityToken, (err, res) ->
+          return console.error(err) if err
+          describe = new SalesforceDescribe(conn, self.sfdcUtilsLogView,
+            self.sfdcUtilsProgressBarView)
+          describe.describeField sobject, field
 
   executeSoql: ->
     editor = atom.workspace.activePaneItem
@@ -222,25 +137,25 @@ module.exports =
           linkleft = ''
           linkright = ''
           result.records.forEach((val, idx) ->
-              if printHeaders
-                printHeaders = false
+            if printHeaders
+              printHeaders = false
 
-                Object.keys(val).forEach((key) ->
-                    if key isnt 'attributes'
-                      headers += "<th nowrap>&nbsp;<strong>#{key}<strong>&nbsp;</th>"
-                  )
-                table += "<tr>#{headers}</tr>"
-
-              row = ''
               Object.keys(val).forEach((key) ->
-                  if val['Id']
-                    linkleft = "<a href=\"#{conn.loginUrl}/#{val['Id']}\">"
-                    linkright ='</a>'
-                  if key isnt 'attributes'
-                    row += "<td nowrap>&nbsp;#{linkleft}#{self.colorify2(val[key])}#{linkright}&nbsp;</td>"
-                )
-              table += "<tr>#{row}</tr>"
+                if key isnt 'attributes'
+                  headers += "<th nowrap>&nbsp;<strong>#{key}<strong>&nbsp;</th>"
+              )
+              table += "<tr>#{headers}</tr>"
+
+            row = ''
+            Object.keys(val).forEach((key) ->
+              if val['Id']
+                linkleft = "<a href=\"#{conn.loginUrl}/#{val['Id']}\">"
+                linkright = '</a>'
+              if key isnt 'attributes'
+                row += "<td nowrap>&nbsp;#{linkleft}#{utils.colorify2(val[key])}#{linkright}&nbsp;</td>"
             )
+          table += "<tr>#{row}</tr>"
+          )
           self.sfdcUtilsLogView.print "<table>#{table}</table>", false
           self.sfdcUtilsProgressBarView.setStatus 'Finished'
           self.clearStatusBar()
@@ -254,26 +169,34 @@ module.exports =
     editor.save()
     parts = editor.getTitle().split('.')
     fullName = parts[0]
-    fileParts = ''
 
     if parts.length > 2
       fileExt = ".#{parts[parts.length - 2]}.#{parts[parts.length - 1]}"
     else
       fileExt = ".#{parts[parts.length - 1]}"
 
-    isMeta = fileParts.contains('-meta.xml')
+    isMeta = fileExt.contains('-meta.xml')
+    ext = null
+    meta = null
     exts = [
-      ".cls"
-      ".page"
-      ".trigger"
-      ".component"
-      ".object"
-      ".cls-meta.xml"
-      ".page-meta.xml"
-      ".trigger-meta.xml"
-      ".component-meta.xml"
-    ]
-    if exts.indexOf(fileExt) is -1
+            [".cls", "ApexClass"]
+            [".page", "ApexPage"]
+            [".trigger", "ApexTrigger"]
+            [".component", "ApexComponent"]
+            [".object", "CustomObject"]
+            [".cls-meta.xml", "ApexClass"]
+            [".page-meta.xml", "ApexPage"]
+            [".trigger-meta.xml", "ApexTrigger"]
+            [".component-meta.xml", "ApexComponent"]
+          ]
+
+    _.each(exts, (v, k) ->
+      if v[0] is fileExt
+        ext = v[0]
+        meta = v[1]
+    )
+
+    if ext = null
       #not a force.com file
       @sfdcUtilsProgressBarView.setStatus 'Finished'
       @clearStatusBar()
@@ -282,13 +205,45 @@ module.exports =
     @sfdcUtilsProgressBarView.setStatus 'Packaging metadata...'
 
     fs = null
-    fs ?= require 'fs'
-    metadata = [{
-        apiVersion: config.apiVersion
-        content: Buffer(fs.readFileSync(editor.getPath())).toString('base64')
-        fullName: fullName
-        label: fullName
-    }]
+    xpath = null
+    dom = null
+    metadata = null
+
+    console.debug 'meta: %s', meta
+    switch meta
+      when 'ApexPage'
+        if isMeta
+          fs ?= require 'fs'
+          xpath ?= require 'xpath'
+          dom ?= require('xmldom').DOMParser
+          xml = fs.readFileSync(editor.getPath()).toString()
+          xml = xml.replace(' xmlns="http://soap.sforce.com/2006/04/metadata"', '')
+          doc = new dom().parseFromString(xml)
+          ver = xpath.select("//apiVersion/text()", doc).toString()
+          desc = xpath.select("//description/text()", doc).toString()
+          label = xpath.select("//label/text()", doc).toString()
+          fullName = xpath.select("//fullName/text()", doc).toString()
+          metadata = [{
+              apiVersion: ver
+              content: Buffer(fs.readFileSync(editor.getPath().replace(meta, ''))).toString('base64')
+          }]
+          metadata[0].fullName = fullName if fullName
+          metadata[0].label = label if label
+          console.debug 'metadata: %s', JSON.stringify(metadata)
+          allowUnsafeNewFunction ->
+            conn.login config.username, config.password + config.securityToken, (err, res) ->
+              conn.tooling.getMetadataContainerId((res) ->
+                if res.size = 1
+                  console.debug 'Id: %s', res.records[0].Id)
+          return
+        elseSr.
+          fs ?= require 'fs'
+          metadata = [{
+              apiVersion: config.apiVersion
+              content: Buffer(fs.rea dFileSync(editor.getPath())).toString('base64')
+              fullName: fullName
+              label: fullName
+          }]
 
     self = @
     allowUnsafeNewFunction ->
@@ -296,18 +251,18 @@ module.exports =
         return console.error(err) if err
 
         conn.metadata.upsertAsync('ApexPage', metadata, (err, res) ->
-            return console.error(err) if err
-            console.debug 'res: %s', res.success
+          return console.error(err) if err
+          console.debug 'res: %s', res.success
 
-            if res.success
-              self.sfdcUtilsProgressBarView.setStatus "#{res.fullName} Saved to server"
-            else
-              self.sfdcUtilsLogView.show()
-              self.sfdcUtilsLogView.clear()
-              self.sfdcUtilsProgressBarView.setStatus "Error saving to server"
-              self.sfdcUtilsLogView.print err, true if err
-              self.sfdcUtilsLogView.print "Error<br />#{JSON.stringify(res.errors, null, 2).replace(/\\/g, '')}" , true
-          )
+          if res.success
+            self.sfdcUtilsProgressBarView.setStatus "#{res.fullName} saved to server"
+          else
+            self.sfdcUtilsLogView.show()
+            self.sfdcUtilsLogView.clear()
+            self.sfdcUtilsProgressBarView.setStatus "Error saving to server"
+            self.sfdcUtilsLogView.print err, true if err
+            self.sfdcUtilsLogView.print "Error<br />#{JSON.stringify(res.errors, null, 2).replace(/\\/g, '')}" , true
+        )
 
     @clearStatusBar()
 
@@ -361,22 +316,22 @@ module.exports =
             return
 
           _.each(res.records, (val, key) ->
-              msg = ''
-              if field
-                msg = val.Parent.Profile.Name + " (" + val.Field + " " + "
-                  permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
-                  read: " + self.colorify(val.PermissionsRead) + " " + "
-                  edit: " + self.colorify(val.PermissionsEdit)
-              else
-                msg = val.Parent.Profile.Name + " (" + val.SobjectType + " " + "
-                  permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
-                  create: " + self.colorify(val.PermissionsCreate) + " " + "
-                  read: " + self.colorify(val.PermissionsRead) + " " + "
-                  edit: " + self.colorify(val.PermissionsEdit) + " " + "
-                  delete: " + self.colorify(val.PermissionsDelete) + " " + "
-                  view all: " + self.colorify(val.PermissionsViewAllRecords) + " " + "
-                  modify all: " + self.colorify(val.PermissionsModifyAllRecords)
-              self.sfdcUtilsLogView.print msg, false)
+            msg = ''
+            if field
+              msg = val.Parent.Profile.Name + " (" + val.Field + " " + "
+                permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
+                read: " + utils.colorify(val.PermissionsRead) + " " + "
+                edit: " + utils.colorify(val.PermissionsEdit)
+            else
+              msg = val.Parent.Profile.Name + " (" + val.SobjectType + " " + "
+                permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
+                create: " + utils.colorify(val.PermissionsCreate) + " " + "
+                read: " + utils.colorify(val.PermissionsRead) + " " + "
+                edit: " + utils.colorify(val.PermissionsEdit) + " " + "
+                delete: " + utils.colorify(val.PermissionsDelete) + " " + "
+                view all: " + utils.colorify(val.PermissionsViewAllRecords) + " " + "
+                modify all: " + utils.colorify(val.PermissionsModifyAllRecords)
+            self.sfdcUtilsLogView.print msg, false)
 
           self.sfdcUtilsProgressBarView.setStatus 'Finished'
           self.clearStatusBar()
