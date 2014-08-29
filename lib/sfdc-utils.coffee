@@ -3,6 +3,7 @@ _ = require 'underscore'
 utils = require './utils'
 SalesforceDescribe = require './salesforce-describe'
 SalesforceSoql = require './salesforce-soql'
+SalesforcePermissions = require './salesforce-permissions'
 
 $ = null
 config = null
@@ -198,75 +199,19 @@ module.exports =
 
     @clearStatusBar()
 
-    # file title
-    #editor.coffee
-    #getTite()
-    #@getPath()
-    #getText()
-    #require path
-    #path.dirname(@getPath() + '-meta.xml')
-
-
   getPermsForSObject: ->
     editor = atom.workspace.activePaneItem
     selection = editor.getSelection()
     parts = selection.getText().trim().split('.')
     sobject = parts[0]
     field = parts[1]
-    conn = new jsforce.Connection()
 
-    @sfdcUtilsProgressBarView.setStatus 'Retrieving...'
-    self = @
-    allowUnsafeNewFunction ->
-      conn.login config.username, config.password + config.securityToken, (err, res) ->
-        return console.error(err) if err
+    perms = new SalesforcePermissions(@sfdcUtilsLogView,
+      @sfdcUtilsProgressBarView)
 
-        query = ''
-        if field
-          query = "SELECT Id, Field, PermissionsEdit, PermissionsRead,
-                      Parent.Profile.Name
-                      FROM FieldPermissions
-                      WHERE SobjectType = '#{sobject}' AND Field =
-                      '#{selection.getText().trim()}'
-                      ORDER BY Parent.Profile.Name"
-        else
-          query = "SELECT Id, SobjectType, PermissionsCreate, PermissionsDelete,
-                      PermissionsEdit, PermissionsModifyAllRecords, PermissionsRead,
-                      PermissionsViewAllRecords, Parent.ProfileId, Parent.Profile.Name
-                      FROM ObjectPermissions
-                      WHERE SobjectType = '#{sobject}' ORDER BY Parent.Profile.Name"
-
-        conn.query query, (err, res) ->
-          self.sfdcUtilsLogView.show()
-          self.sfdcUtilsLogView.clear()
-          self.sfdcUtilsLogView.removeLastEmptyLogLine()
-
-          if err
-            self.sfdcUtilsLogView.print err.toString(), true
-            self.sfdcUtilsProgressBarView.setStatus 'Failed'
-            self.clearStatusBar()
-            return
-
-          _.each(res.records, (val, key) ->
-            msg = ''
-            if field
-              msg = val.Parent.Profile.Name + " (" + val.Field + " " + "
-                permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
-                read: " + utils.colorify(val.PermissionsRead) + " " + "
-                edit: " + utils.colorify(val.PermissionsEdit)
-            else
-              msg = val.Parent.Profile.Name + " (" + val.SobjectType + " " + "
-                permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
-                create: " + utils.colorify(val.PermissionsCreate) + " " + "
-                read: " + utils.colorify(val.PermissionsRead) + " " + "
-                edit: " + utils.colorify(val.PermissionsEdit) + " " + "
-                delete: " + utils.colorify(val.PermissionsDelete) + " " + "
-                view all: " + utils.colorify(val.PermissionsViewAllRecords) + " " + "
-                modify all: " + utils.colorify(val.PermissionsModifyAllRecords)
-            self.sfdcUtilsLogView.print msg, false)
-
-          self.sfdcUtilsProgressBarView.setStatus 'Finished'
-          self.clearStatusBar()
-          return
-
-        return
+    if field
+      console.debug 'field'
+      perms.getFieldPermissions sobject, field
+    else if sobject
+      console.debug 'sobject'
+      perms.getSobjectPermissions sobject
