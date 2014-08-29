@@ -2,6 +2,7 @@
 _ = require 'underscore'
 utils = require './utils'
 SalesforceDescribe = require './salesforce-describe'
+SalesforceSoql = require './salesforce-soql'
 
 $ = null
 config = null
@@ -52,12 +53,10 @@ module.exports =
     self = @
 
   deactivate: ->
-    #@sfdcUtilsView.destroy()
     @sfdcUtilsProgressBarView?.destroy()
     @sfdcUtilsLogView?.destroy()
 
   serialize: ->
-    #sfdcUtilsViewState: @sfdcUtilsView.serialize()
     sfdcUtilsLogViewState: @sfdcUtilsLogView?.serialize()
 
   #
@@ -69,7 +68,7 @@ module.exports =
     ), 5000
 
   closeLogView: ->
-    @sfdcUtilsLogView?.destroy()
+    @sfdcUtilsLogView?.hide()
 
   #
   # Show/hide the retreive log
@@ -81,86 +80,19 @@ module.exports =
     editor = atom.workspace.activePaneItem
     selection = editor.getSelection()
     parts = selection.getText().trim().split('.')
-    sobject = parts[0]
-    field = parts[1]
-    conn = new jsforce.Connection()
-    self = @
+    [sobject, field] = [parts[0], parts[1]]
+    describe = new SalesforceDescribe(@sfdcUtilsLogView,
+                    @sfdcUtilsProgressBarView)
 
-    allowUnsafeNewFunction ->
-      conn.login config.username,
-        config.password + config.securityToken, (err, res) ->
-          return console.error(err) if err
-          describe = new SalesforceDescribe(conn, self.sfdcUtilsLogView,
-            self.sfdcUtilsProgressBarView)
-          describe.describeField sobject, field
+    describe.describeField sobject, field
 
   executeSoql: ->
     editor = atom.workspace.activePaneItem
-    selection = editor.getSelection()
-    conn = new jsforce.Connection()
+    query = editor.getSelection().getText().trim()
+    soql = new SalesforceSoql(@sfdcUtilsLogView,
+                @sfdcUtilsProgressBarView)
 
-    @sfdcUtilsProgressBarView.setStatus 'Retrieving...'
-    self = @
-    allowUnsafeNewFunction ->
-      conn.login config.username, config.password + config.securityToken, (err, res) ->
-        return console.error(err) if err
-
-        records = []
-        query = conn.query(selection.getText().trim())
-        query.on("record", (record) ->
-          records.push record
-          return
-        ).on("error", (err) ->
-          callback err
-          return
-        ).on("end", ->
-          callback null,
-            query: query
-            records: records
-
-          return
-        ).run
-          autoFetch: true
-          maxFetch: 5000
-
-        callback = ((err, result) ->
-          self.sfdcUtilsLogView.show()
-          self.sfdcUtilsLogView.clear()
-          self.sfdcUtilsLogView.print err.toString(), true if err
-          return console.error err if err
-          self.sfdcUtilsLogView.removeLastEmptyLogLine()
-          printHeaders = true
-          getKey = true
-          table = ''
-          headers = ''
-          row = ''
-          linkleft = ''
-          linkright = ''
-          result.records.forEach((val, idx) ->
-            if printHeaders
-              printHeaders = false
-
-              Object.keys(val).forEach((key) ->
-                if key isnt 'attributes'
-                  headers += "<th nowrap>&nbsp;<strong>#{key}<strong>&nbsp;</th>"
-              )
-              table += "<tr>#{headers}</tr>"
-
-            row = ''
-            Object.keys(val).forEach((key) ->
-              if val['Id']
-                linkleft = "<a href=\"#{conn.loginUrl}/#{val['Id']}\">"
-                linkright = '</a>'
-              if key isnt 'attributes'
-                row += "<td nowrap>&nbsp;#{linkleft}#{utils.colorify2(val[key])}#{linkright}&nbsp;</td>"
-            )
-          table += "<tr>#{row}</tr>"
-          )
-          self.sfdcUtilsLogView.print "<table>#{table}</table>", false
-          self.sfdcUtilsProgressBarView.setStatus 'Finished'
-          self.clearStatusBar()
-          return
-        )
+    soql.executeSoql query
 
   saveMetaComponents: ->
     @sfdcUtilsProgressBarView.setStatus 'Saving...'
