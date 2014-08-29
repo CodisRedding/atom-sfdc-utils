@@ -6,8 +6,8 @@ class SalesforceDescribe extends Salesforce
     super(@logView, @statusBar)
 
   describeField: (sobjectName, field) ->
-    un = config.username
-    pw = config.password + config.securityToken
+    un = @config.username
+    pw = @config.password + @config.securityToken
     conn = new jsforce.Connection()
     self = @
 
