@@ -4,10 +4,20 @@
 # Base class for all Salesforce utilities
 module.exports =
 class Salesforce
+  _loginUrl = atom.config.get("sfdc-utils.loginUrl")
+  _username = atom.config.get("sfdc-utils.username")
+  _password = atom.config.get("sfdc-utils.password")
+  _securityToken = atom.config.get("sfdc-utils.securityToken")
+  _apiVersion = atom.config.get("sfdc-utils.apiVersion")
+
   constructor: (@logView, @statusBar) ->
     @utils ?= require './utils'
-    @config ?= require './config/salesforce'
     # This is to allow jsforce to run without
     # warnings that use of eval is evil
     allowUnsafeNewFunction ->
       @jsforce ?= require 'jsforce'
+    @conn = new jsforce.Connection()
+
+  login: (callback) ->
+    @conn.login _username, _password + _securityToken, (err, res) ->
+      callback(err, res)

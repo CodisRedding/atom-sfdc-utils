@@ -13,16 +13,14 @@ class SalesforceDescribe extends Salesforce
   # field. This information includes picklist
   # values
   describeField: (sobjectName, field) ->
-    un = @config.username
-    pw = @config.password + @config.securityToken
-    conn = new jsforce.Connection()
     self = @
 
     # Create a connection to Salesforce
-    conn.login un, pw, (err, res) ->
+    #conn.login @username, @password + @securityToken, (err, res) ->
+    @login (err, res) ->
       return console.error err if err
 
-      sobj = conn.sobject(sobjectName)
+      sobj = self.conn.sobject(sobjectName)
       self.statusBar.setStatus 'Retrieving...'
 
       # Call Salesforce API to describe field

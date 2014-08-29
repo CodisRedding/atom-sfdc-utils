@@ -10,18 +10,15 @@ class SalesforceSoql extends Salesforce
   # [executeSoql]
   # Displays the results of the soql passed in
   executeSoql: (soql) ->
-    un = @config.username
-    pw = @config.password + @config.securityToken
-    conn = new jsforce.Connection()
     self = @
 
     # Create a connection to Salesforce
-    conn.login un, pw, (err, res) ->
+    @login (err, res) ->
       return console.error err if err
 
       # max records to fetch is 5k
       records = []
-      query = conn.query(soql)
+      query = self.conn.query(soql)
       query.on("record", (record) ->
         records.push record
         return
@@ -44,7 +41,7 @@ class SalesforceSoql extends Salesforce
         self.logView.print err.toString(), true if err
         return console.error err if err
         self.logView.removeLastEmptyLogLine()
-        
+
         printHeaders = true
         getKey = true
         headers = ''
@@ -68,7 +65,7 @@ class SalesforceSoql extends Salesforce
           row = ''
           Object.keys(val).forEach (key) ->
             if val['Id']
-              linkleft = "<a href=\"#{conn.loginUrl}/#{val['Id']}\">"
+              linkleft = "<a href=\"#{self.conn.loginUrl}/#{val['Id']}\">"
               linkright = '</a>'
 
             if key isnt 'attributes'

@@ -1,5 +1,4 @@
 Salesforce = require './salesforce'
-_ = require 'underscore'
 
 # [SalesforcePermissions]
 # Displays the persmissions for a sobject
@@ -13,13 +12,10 @@ class SalesforcePermissions extends Salesforce
   # Displays the permissions for a sobject
   # for every profile
   getSobjectPermissions: (sobject) ->
-    un = @config.username
-    pw = @config.password + @config.securityToken
-    conn = new jsforce.Connection()
     self = @
 
     # Create a connection to Salesforce
-    conn.login un, pw, (err, res) ->
+    @login (err, res) ->
       return console.error err if err
 
       self.statusBar.setStatus 'Retrieving...'
@@ -42,7 +38,7 @@ class SalesforcePermissions extends Salesforce
                       SobjectType"
 
       # Call Salesforce API to run a SOQL query
-      conn.query query, (err, res) ->
+      self.conn.query query, (err, res) ->
         self.logView.show()
         self.logView.clear()
         self.logView.removeLastEmptyLogLine()
@@ -59,7 +55,7 @@ class SalesforcePermissions extends Salesforce
         # Format and display the permissions for each
         # sobject for each profile
         s = '&nbsp;'
-        _.each res.records, (val, key) ->
+        res.records.forEach (val, key) ->
           msg = "#{val.Parent.Profile.Name} (#{val.SobjectType}#{s}
             permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
             create: #{self.utils.colorify(val.PermissionsCreate)}#{s}
@@ -83,13 +79,10 @@ class SalesforcePermissions extends Salesforce
   # Displays the permissions for a field
   # for every profile
   getFieldPermissions: (sobject, field) ->
-    un = @config.username
-    pw = @config.password + @config.securityToken
-    conn = new jsforce.Connection()
     self = @
 
     # create a connection to Salesforce
-    conn.login un, pw, (err, res) ->
+    @login (err, res) ->
       return console.error err if err
 
       self.statusBar.setStatus 'Retrieving...'
@@ -109,7 +102,7 @@ class SalesforcePermissions extends Salesforce
                       Field"
 
       # Call Salesforce API to run a SOQL query
-      conn.query query, (err, res) ->
+      self.conn.query query, (err, res) ->
         self.logView.show()
         self.logView.clear()
         self.logView.removeLastEmptyLogLine()
@@ -124,7 +117,7 @@ class SalesforcePermissions extends Salesforce
 
         # Format and display the permissions for each
         # field for each profile
-        _.each res.records, (val, key) ->
+        res.records.forEach (val, key) ->
           msg = "#{val.Parent.Profile.Name} (#{val.Field}&nbsp;
             permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
             read: #{self.utils.colorify(val.PermissionsRead)}
