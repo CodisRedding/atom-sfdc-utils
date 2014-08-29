@@ -1,19 +1,25 @@
 Salesforce = require './salesforce'
 
+# [SalesforceSoql]
+# Displays the results of a soql query
 module.exports =
 class SalesforceSoql extends Salesforce
   constructor: (@logView, @statusBar) ->
     super(@logView, @statusBar)
 
+  # [executeSoql]
+  # Displays the results of the soql passed in
   executeSoql: (soql) ->
     un = @config.username
     pw = @config.password + @config.securityToken
     conn = new jsforce.Connection()
     self = @
 
+    # Create a connection to Salesforce
     conn.login un, pw, (err, res) ->
       return console.error err if err
 
+      # max records to fetch is 5k
       records = []
       query = conn.query(soql)
       query.on("record", (record) ->
@@ -31,6 +37,7 @@ class SalesforceSoql extends Salesforce
         autoFetch: true
         maxFetch: 5000
 
+      # Formats soql results
       callback = ((err, result) ->
         self.logView.show()
         self.logView.clear()
@@ -48,12 +55,14 @@ class SalesforceSoql extends Salesforce
           if printHeaders
             printHeaders = false
 
+            # Create the soql results header
             Object.keys(val).forEach((key) ->
               if key isnt 'attributes'
                 headers += "<th nowrap>&nbsp;<strong>#{key}<strong>&nbsp;</th>"
             )
             table += "<tr>#{headers}</tr>"
 
+          # Create the rows of data from soql results
           row = ''
           Object.keys(val).forEach((key) ->
             if val['Id']
@@ -68,9 +77,11 @@ class SalesforceSoql extends Salesforce
           table += "<tr>#{row}</tr>"
         )
 
+        # Display formatted soql results
         self.logView.print "<table>#{table}</table>", false
         self.statusBar.setStatus 'Finished'
 
+        # fade out the current status bar value
         setTimeout (=>
           self.statusBar.clear()
         ), 5000

@@ -1,17 +1,24 @@
 Salesforce = require './salesforce'
 _ = require 'underscore'
 
+# [SalesforcePermissions]
+# Displays the persmissions for a sobject
+# or field for each profile
 module.exports =
 class SalesforcePermissions extends Salesforce
   constructor: (@logView, @statusBar) ->
     super(@logView, @statusBar)
 
+  # [getSobjectPermissions]
+  # Displays the permissions for a sobject
+  # for every profile
   getSobjectPermissions: (sobject) ->
     un = @config.username
     pw = @config.password + @config.securityToken
     conn = new jsforce.Connection()
     self = @
 
+    # Create a connection to Salesforce
     conn.login un, pw, (err, res) ->
       return console.error err if err
 
@@ -31,8 +38,10 @@ class SalesforcePermissions extends Salesforce
                 WHERE
                       SobjectType = '#{sobject}'
                 ORDER BY
-                      Parent.Profile.Name"
+                      Parent.Profile.Name,
+                      SobjectType"
 
+      # Call Salesforce API to run a SOQL query
       conn.query query, (err, res) ->
         self.logView.show()
         self.logView.clear()
@@ -41,11 +50,14 @@ class SalesforcePermissions extends Salesforce
         if err
           self.logView.print err.toString(), true
           self.statusBar.setStatus 'Failed'
+          # fade out the current status bar value
           setTimeout (=>
             self.statusBar.clear()
           ), 5000
           return
 
+        # Format and display the permissions for each
+        # sobject for each profile
         s = '&nbsp;'
         _.each(res.records, (val, key) ->
           msg = "#{val.Parent.Profile.Name} (#{val.SobjectType}#{s}
@@ -60,6 +72,7 @@ class SalesforcePermissions extends Salesforce
         )
 
         self.statusBar.setStatus 'Finished'
+        #fade out the current status bar value
         setTimeout (=>
           self.statusBar.clear()
         ), 5000
@@ -67,12 +80,16 @@ class SalesforcePermissions extends Salesforce
 
       return
 
+  # [getFieldPermissions]
+  # Displays the permissions for a field
+  # for every profile
   getFieldPermissions: (sobject, field) ->
     un = @config.username
     pw = @config.password + @config.securityToken
     conn = new jsforce.Connection()
     self = @
 
+    # create a connection to Salesforce
     conn.login un, pw, (err, res) ->
       return console.error err if err
 
@@ -89,8 +106,10 @@ class SalesforcePermissions extends Salesforce
                       AND
                       Field = '#{sobject}.#{field}'
                 ORDER BY
-                      Parent.Profile.Name"
+                      Parent.Profile.Name,
+                      Field"
 
+      # Call Salesforce API to run a SOQL query
       conn.query query, (err, res) ->
         self.logView.show()
         self.logView.clear()
@@ -104,6 +123,8 @@ class SalesforcePermissions extends Salesforce
           ), 5000
           return
 
+        # Format and display the permissions for each
+        # field for each profile
         _.each(res.records, (val, key) ->
           msg = "#{val.Parent.Profile.Name} (#{val.Field}&nbsp;
             permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
@@ -113,6 +134,7 @@ class SalesforcePermissions extends Salesforce
         )
 
         self.statusBar.setStatus 'Finished'
+        # fade out the current status bar value
         setTimeout (=>
           self.statusBar.clear()
         ), 5000

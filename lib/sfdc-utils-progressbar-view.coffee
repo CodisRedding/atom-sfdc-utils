@@ -1,6 +1,9 @@
 {View} = require 'atom'
 $ = require('atom').$
 
+# [SfdcUtilsProgressBarView]
+# Provides the status bar for diplaying
+# messages about Salesforce uility results
 module.exports =
 class SfdcUtilsProgressBarView extends View
   @content: ->

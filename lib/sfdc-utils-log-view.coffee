@@ -1,6 +1,9 @@
 {View} = require 'atom'
 $ = require('atom').$
 
+# [SfdcUtilsLogView]
+# Provides the container for displaying
+# results from all Salesforce utilities
 module.exports =
 class SfdcUtilsLogView extends View
   lastHeader = null
@@ -8,8 +11,8 @@ class SfdcUtilsLogView extends View
   lastMessageType = null
 
   @content: ->
-      @div tabIndex: -1, class: 'sfdc-utils-log-view tool-panel bottom-bottom', =>
-        @ul outlet: 'canvas', class: 'list-tree'
+    @div tabIndex: -1, class: 'sfdc-utils-log-view tool-panel bottom-bottom', =>
+      @ul outlet: 'canvas', class: 'list-tree'
 
   initialize: (serializeState) ->
     @textBuffer = $("<pre class=\"stderr\">")
@@ -43,7 +46,8 @@ class SfdcUtilsLogView extends View
     # console.log 'print: %s', line
     # If we are scrolled all the way down we follow the output
     panel = @canvas.parent()
-    at_bottom = (panel.scrollTop() + panel.innerHeight() + 10 > panel[0].scrollHeight)
+    bottom_height = panel.scrollTop() + panel.innerHeight() + 10
+    at_bottom = (bottom_height > panel[0].scrollHeight)
 
     # Header
     #line = @removeTerminalColors line
@@ -57,7 +61,8 @@ class SfdcUtilsLogView extends View
     lastHeader = icon
     @canvas.append $("<li class=\"list-item\">
                         <div class=\"list-item\">
-                          <pre class=\"icon icon-#{icon} #{errClass}\">#{line}</pre>
+                          <pre class=\"icon icon-#{icon} #{errClass}\">#{line}
+                          </pre>
                         </div>
                       </li")
 

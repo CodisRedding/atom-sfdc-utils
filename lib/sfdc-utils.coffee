@@ -1,9 +1,7 @@
-utils = require './utils'
 SalesforceDescribe = require './salesforce-describe'
 SalesforceSoql = require './salesforce-soql'
 SalesforcePermissions = require './salesforce-permissions'
 
-$ = null
 SfdcUtilsProgressBarView = null
 SfdcUtilsLogView = null
 
@@ -18,7 +16,6 @@ module.exports =
     apiVersion: 'xx.x'
 
   activate: (state) ->
-    $ ?= require('atom').$
     SfdcUtilsProgressBarView ?= require './sfdc-utils-progressbar-view'
     SfdcUtilsLogView ?= require './sfdc-utils-log-view'
     @sfdcUtilsProgressBarView = new SfdcUtilsProgressBarView()
@@ -59,6 +56,9 @@ module.exports =
   toggle: ->
     @sfdcUtilsLogView.toggle()
 
+  # Displays describe information about a sobject
+  # field. This information includes picklist
+  # values
   getFieldInfo: ->
     editor = atom.workspace.activePaneItem
     selection = editor.getSelection()
@@ -70,6 +70,7 @@ module.exports =
 
     describe.describeField sobject, field
 
+  # Displays the results of the soql passed in
   executeSoql: ->
     editor = atom.workspace.activePaneItem
     query = editor.getSelection().getText().trim()
@@ -78,6 +79,8 @@ module.exports =
 
     soql.executeSoql query
 
+  # Displays the permissions for a sobject
+  # or field for every profile
   getPermsForSObject: ->
     editor = atom.workspace.activePaneItem
     selection = editor.getSelection()
