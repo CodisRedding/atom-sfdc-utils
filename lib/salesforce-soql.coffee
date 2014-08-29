@@ -38,12 +38,13 @@ class SalesforceSoql extends Salesforce
         maxFetch: 5000
 
       # Formats soql results
-      callback = ((err, result) ->
+      callback = (err, result) ->
         self.logView.show()
         self.logView.clear()
         self.logView.print err.toString(), true if err
         return console.error err if err
         self.logView.removeLastEmptyLogLine()
+        
         printHeaders = true
         getKey = true
         headers = ''
@@ -51,20 +52,21 @@ class SalesforceSoql extends Salesforce
         linkright = ''
         row = ''
         table = ""
-        result.records.forEach((val, idx) ->
+
+        result.records.forEach (val, idx) ->
           if printHeaders
             printHeaders = false
 
             # Create the soql results header
-            Object.keys(val).forEach((key) ->
+            Object.keys(val).forEach (key) ->
               if key isnt 'attributes'
                 headers += "<th nowrap>&nbsp;<strong>#{key}<strong>&nbsp;</th>"
-            )
+
             table += "<tr>#{headers}</tr>"
 
           # Create the rows of data from soql results
           row = ''
-          Object.keys(val).forEach((key) ->
+          Object.keys(val).forEach (key) ->
             if val['Id']
               linkleft = "<a href=\"#{conn.loginUrl}/#{val['Id']}\">"
               linkright = '</a>'
@@ -72,10 +74,8 @@ class SalesforceSoql extends Salesforce
             if key isnt 'attributes'
               row += "<td nowrap>&nbsp;#{linkleft}
                       #{self.utils.colorify2(val[key])}#{linkright}&nbsp;</td>"
-          )
 
           table += "<tr>#{row}</tr>"
-        )
 
         # Display formatted soql results
         self.logView.print "<table>#{table}</table>", false
@@ -86,4 +86,3 @@ class SalesforceSoql extends Salesforce
           self.statusBar.clear()
         ), 5000
         return
-      )

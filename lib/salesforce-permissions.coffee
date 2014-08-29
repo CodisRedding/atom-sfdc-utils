@@ -59,7 +59,7 @@ class SalesforcePermissions extends Salesforce
         # Format and display the permissions for each
         # sobject for each profile
         s = '&nbsp;'
-        _.each(res.records, (val, key) ->
+        _.each res.records, (val, key) ->
           msg = "#{val.Parent.Profile.Name} (#{val.SobjectType}#{s}
             permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
             create: #{self.utils.colorify(val.PermissionsCreate)}#{s}
@@ -69,7 +69,6 @@ class SalesforcePermissions extends Salesforce
             view all: #{self.utils.colorify(val.PermissionsViewAllRecords)}#{s}
             modify all: #{self.utils.colorify(val.PermissionsModifyAllRecords)}"
           self.logView.print msg, false
-        )
 
         self.statusBar.setStatus 'Finished'
         #fade out the current status bar value
@@ -125,13 +124,12 @@ class SalesforcePermissions extends Salesforce
 
         # Format and display the permissions for each
         # field for each profile
-        _.each(res.records, (val, key) ->
+        _.each res.records, (val, key) ->
           msg = "#{val.Parent.Profile.Name} (#{val.Field}&nbsp;
             permissions)<br />&nbsp;&nbsp;&nbsp;&nbsp;
             read: #{self.utils.colorify(val.PermissionsRead)}
             edit: #{self.utils.colorify(val.PermissionsEdit)}"
           self.logView.print msg, false
-        )
 
         self.statusBar.setStatus 'Finished'
         # fade out the current status bar value

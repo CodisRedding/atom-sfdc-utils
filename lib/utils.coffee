@@ -1,3 +1,5 @@
+# [Utils]
+# General utilities
 module.exports =
 class Utils
   @colorify: (boolValue) ->

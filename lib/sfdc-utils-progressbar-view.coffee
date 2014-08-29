@@ -11,7 +11,8 @@ class SfdcUtilsProgressBarView extends View
       @a title: 'sfdc utils', class: 'retrieve-status', =>
         @img src: 'atom://sfdc-utils/images/spark.png', class: 'spark'
         @span ' '
-      @progress class: 'inline-block', max: '100', value: '0', outlet: 'progress'
+      @progress class: 'inline-block', max: '100', value: '0', outlet:
+        'progress'
 
   initialize: (serializeState) ->
     @on 'click', => @toggleLog()
