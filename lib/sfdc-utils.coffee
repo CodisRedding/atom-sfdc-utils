@@ -1,6 +1,7 @@
 SalesforceDescribe = require './salesforce-describe'
 SalesforceSoql = require './salesforce-soql'
 SalesforcePermissions = require './salesforce-permissions'
+SalesforceMeta = require './salesforce-meta'
 
 SfdcUtilsProgressBarView = null
 SfdcUtilsLogView = null
@@ -55,6 +56,17 @@ module.exports =
 
   toggle: ->
     @sfdcUtilsLogView.toggle()
+
+
+  saveMetaComponents: ->
+    editor = atom.workspace.getActiveEditor()
+    editor.save()
+    path = editor.getPath()
+
+    meta = new SalesforceMeta(path, @sfdcUtilsLogView,
+                    @sfdcUtilsProgressBarView)
+
+    meta.save()
 
   # Displays describe information about a sobject
   # field. This information includes picklist

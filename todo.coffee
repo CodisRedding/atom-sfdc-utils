@@ -73,11 +73,11 @@ saveMetaComponents: ->
               if res.size = 1
                 console.debug 'Id: %s', res.records[0].Id)
         return
-      elseSr.
+      else
         fs ?= require 'fs'
         metadata = [{
             apiVersion: config.apiVersion
-            content: Buffer(fs.rea dFileSync(editor.getPath())).toString('base64')
+            content: Buffer(fs.readFileSync(editor.getPath())).toString('base64')
             fullName: fullName
             label: fullName
         }]
@@ -89,7 +89,7 @@ saveMetaComponents: ->
 
       conn.metadata.upsertAsync('ApexPage', metadata, (err, res) ->
         return console.error(err) if err
-        console.debug 'res: %s', res.success
+        console.debug 'res: %s', res.success`
 
         if res.success
           self.sfdcUtilsProgressBarView.setStatus "#{res.fullName} saved to server"
