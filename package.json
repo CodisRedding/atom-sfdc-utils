@@ -1,7 +1,7 @@
 {
   "name": "atom-sfdc-utils",
   "main": "./lib/sfdc-utils",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Random Salesforce utilities",
   "activationEvents": [
     "sfdc-utils:toggle",
