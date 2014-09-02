@@ -2,6 +2,8 @@ SalesforceDescribe = require './salesforce-describe'
 SalesforceSoql = require './salesforce-soql'
 SalesforcePermissions = require './salesforce-permissions'
 SalesforceMeta = require './salesforce-meta'
+SalesforceNew = require './salesforce-new'
+path = require 'path'
 
 SfdcUtilsProgressBarView = null
 SfdcUtilsLogView = null
@@ -24,23 +26,19 @@ module.exports =
 
     # Hooking up commands
     atom.workspaceView.command 'sfdc-utils:toggle', =>
-      console.debug 'sfdc-utils:toggle triggered'
       @toggle()
     atom.workspaceView.command 'sfdc-utils:closeLogView', =>
-      console.debug 'sfdc-utils:closeLogView triggered'
       @closeLogView()
     atom.workspaceView.command 'sfdc-utils:getObjectPermissions', =>
-      console.debug 'sfdc-utils:getPermsForSObject triggered'
       @getPermsForSObject()
     atom.workspaceView.command 'sfdc-utils:getFieldInfo', =>
-      console.debug 'sfdc-utils:getFieldInfo triggered'
       @getFieldInfo()
     atom.workspaceView.command 'sfdc-utils:executeSoql', =>
-      console.debug 'sfdc-utils:executeSoql triggered'
       @executeSoql()
     atom.workspaceView.command 'sfdc-utils:saveMetaComponents', =>
-      console.debug 'sfdc-utils:saveMetaComponents triggered'
       @saveMetaComponents()
+    atom.workspaceView.command 'sfdc-utils:createNewComponent', =>
+      @createNewComponent()
 
     self = @
 
@@ -67,6 +65,40 @@ module.exports =
                     @sfdcUtilsProgressBarView)
 
     meta.save()
+
+  createNewComponent: ->
+    editor = atom.workspace.getActiveEditor()
+    filePath = editor.getPath()
+    selection = editor.getSelection()
+    parts = selection.getText().trim().split('.')
+    return if parts.length < 3
+
+    [type, name, label] = [parts[0], parts[1], parts[2]]
+    desc = if parts.length == 4 then parts[3] else ''
+
+    sfNew = new SalesforceNew(@sfdcUtilsLogView,
+                    @sfdcUtilsProgressBarView)
+
+    dirName = path.dirname(filePath)
+    self = @
+
+    if type == 'ApexPage'
+      sfNew.createApexPage dirName, name, label, desc, (err, res) ->
+        return console.error(err) if err
+
+        page = res # page path
+        meta = new SalesforceMeta(page, self.sfdcUtilsLogView,
+                        self.sfdcUtilsProgressBarView)
+        meta.save()
+
+    else if type == 'ApexTrigger'
+      # TODO
+      return null
+      
+    else if type == 'ApexClass'
+      # TODO
+      return null
+
 
   # Displays describe information about a sobject
   # field. This information includes picklist

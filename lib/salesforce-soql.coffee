@@ -9,7 +9,7 @@ class SalesforceSoql extends Salesforce
 
   # [executeSoql]
   # Displays the results of the soql passed in
-  executeSoql: (soql) ->
+  executeSoql: (soql, cb) ->
     self = @
 
     # Create a connection to Salesforce

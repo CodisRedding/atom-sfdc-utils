@@ -18,6 +18,9 @@ class Salesforce
       @jsforce ?= require 'jsforce'
     @conn = new jsforce.Connection()
 
+  getApiVersion: ->
+    return _apiVersion
+
   login: (callback) ->
     @conn.login _username, _password + _securityToken, (err, res) ->
       callback(err, res)

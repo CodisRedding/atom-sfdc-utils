@@ -26,6 +26,7 @@ class SalesforceMeta extends Salesforce
 
   constructor: (filePath, @logView, @statusBar) ->
     super(@logView, @statusBar)
+
     @_filePath = filePath
     fileExt = @_getFileExt()
 
@@ -33,7 +34,6 @@ class SalesforceMeta extends Salesforce
     if !_extensions[fileExt]
       @_filePath = null
       @_metaComponent = null
-      console.debug 'extension \'%s\' not found in path', fileExt
       return
 
     if fileExt.indexOf('-meta.xml') != -1
@@ -41,9 +41,6 @@ class SalesforceMeta extends Salesforce
       @_filePath = @_filePath.replace('-meta.xml', '')
     else
       @_metaFilePath = "#{@_filePath}-meta.xml"
-
-    console.debug '_filePath: %s, _metaFilePath: %s, _metaComponent: %s',
-      @_filePath, @_metaFilePath, @_metaComponent
 
   save: ->
     metadata = @_createMetadata()
@@ -53,25 +50,26 @@ class SalesforceMeta extends Salesforce
     @login (err, res) ->
       return console.error err if err
 
-      self.conn.metadata.upsertAsync self._metaComponent, metadata, (err, res) ->
+      self.conn.metadata.upsertAsync self._metaComponent,
+        metadata, (err, res) ->
         return console.error err if err
-        console.debug 'res: %s', JSON.stringify(res)
 
         if res.success
-          self.statusBar.setStatus "#{res.fullName} saved to server"
+          self.statusBar.setStatus "#{res.fullName} saved to Salesforce"
         else
           self.logView.show()
           self.logView.clear()
-          self.statusBar.setStatus "Error saving to server"
+          self.statusBar.setStatus "Error saving to Salesforce"
           self.logView.print err, true if err
-          self.logView.print "Error<br />#{JSON.stringify(res.errors, null, 2).replace(/\\/g, '')}" , true
+          self.logView.print "Error<br />
+              #{JSON.stringify(res.errors, null, 2).replace(/\\/g, '')}" , true
 
         # fade out the current status bar value
         setTimeout (=>
           self.statusBar.clear()
         ), 5000
         return
-        
+
   _createMetadata: ->
     @statusBar.setStatus 'Packaging metadata...'
     metadata = [{ content: @_getFileContents(@_filePath, 'base64') }]
@@ -97,7 +95,6 @@ class SalesforceMeta extends Salesforce
     xml = @_getFileContents(@_metaFilePath)
     parser.write(xml).close()
 
-    console.debug 'metadata: %s', JSON.stringify(metadata)
     return metadata
 
   _getFileContents: (filePath, encoding = null) ->

@@ -9,7 +9,8 @@
     "sfdc-utils:getObjectPermissions",
     "sfdc-utils:getFieldInfo",
     "sfdc-utils:executeSoql",
-    "sfdc-utils:saveMetaComponents"
+    "sfdc-utils:saveMetaComponents",
+    "sfdc-utils:createNewComponent"
   ],
   "repository": "https://github.com/fourq/atom-sfdc-utils",
   "license": "MIT",
