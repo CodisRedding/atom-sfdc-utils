@@ -68,7 +68,6 @@ class SalesforceMeta extends Salesforce
         setTimeout (=>
           self.statusBar.clear()
         ), 5000
-        return
 
   _createMetadata: ->
     @statusBar.setStatus 'Packaging metadata...'

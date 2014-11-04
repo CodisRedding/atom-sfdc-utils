@@ -33,15 +33,15 @@ class SfdcUtilsProgressBarView extends View
     @remove()
 
   toggleLog: ->
-      atom.workspaceView.trigger 'sfdc-utils:toggle'
+    atom.workspaceView.trigger 'sfdc-utils:toggle'
 
   setStatus: (text, type = null) ->
-      el = this.find('.retrieve-status span')
-      el.text(text)
-        .removeClass()
+    el = this.find('.retrieve-status span')
+    el.text(text)
+      .removeClass()
 
-      if type
-        el.addClass('text-' + type)
+    if type
+      el.addClass('text-' + type)
 
   clear: ->
     el = this.find('.retrieve-status span')

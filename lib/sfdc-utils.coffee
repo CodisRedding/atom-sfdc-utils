@@ -94,7 +94,7 @@ module.exports =
     else if type == 'ApexTrigger'
       # TODO
       return null
-      
+
     else if type == 'ApexClass'
       # TODO
       return null
